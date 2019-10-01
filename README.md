@@ -44,7 +44,7 @@ Additionally, the bundle files will be generated in the `target` build directory
       - js-bundle.js
 ```
 
-## How do I use this plugin?
+## How do I use it?
 
 1. Include the plugin in your projects `pom.xml` before any plugin that generates the resulting jar.
 
