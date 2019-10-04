@@ -6,7 +6,7 @@
 
     <groupId>com.github.crmepham</groupId>
     <artifactId>resource-bundler-maven-plugin</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>Resource Bundler</name>
     <packaging>maven-plugin</packaging>
     <url>https://github.com/crmepham/resource-bundler-maven-plugin</url>
