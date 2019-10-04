@@ -39,54 +39,6 @@ import org.apache.maven.plugins.annotations.Parameter;
  *     by specifying a value for the <em>toPath</em> property.
  * </p>
  *
- * <p>
- *     Execute the plugin directly using the command <em>mvn resource-bundler:bundle</em>.
- * </p>
- *
- * <p>
- *     Or, add it to your Spring projects Maven build cycle, before jar creation, like so:
- * </p>
- *
- * <pre>
- * <plugin>
- *     <groupId>com.github.crmepham</groupId>
- *     <artifactId>resource-bundler-maven-plugin</artifactId>
- *     <version>1.1-SNAPSHOT</version>
- *     <executions>
- *         <execution>
- *             <phase>package</phase>
- *             <goals>
- *                 <goal>bundle</goal>
- *             </goals>
- *         </execution>
- *     </executions>
- * </plugin>
- * </pre>
- *
- * <p>
- *     Override the default properties like so:
- * </p>
- *
- * <pre>
- * <plugin>
- *     <groupId>com.github.crmepham</groupId>
- *     <artifactId>resource-bundler-maven-plugin</artifactId>
- *     <version>1.1-SNAPSHOT</version>
- *     <configuration>
- *         <fromPath>path/to/resources</fromPath>
- *         <toPath>path/to/target/destination</toPath>
- *     </configuration>
- *     <executions>
- *         <execution>
- *             <phase>package</phase>
- *             <goals>
- *                 <goal>bundle</goal>
- *             </goals>
- *         </execution>
- *     </executions>
- * </plugin>
- * </pre>
- *
  * See https://github.com/crmepham/resource-bundler-maven-plugin
  *
  * @author Christopher Mepham
