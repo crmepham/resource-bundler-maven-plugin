@@ -49,5 +49,47 @@ Additionally, the bundle files will be generated in the `target` build directory
 1. Include the plugin in your projects `pom.xml` before any plugin that generates the resulting jar.
 
 ```
-Example here...
+<build>
+    <plugins>
+        <plugin>
+            <groupId>com.github.crmepham</groupId>
+            <artifactId>resource-bundler-maven-plugin</artifactId>
+            <version>1.1-SNAPSHOT</version>
+            <executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>bundle</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</build>
+```
+
+2. To customize the input and output paths simply specify the property values in a `<configuration>` block:
+
+```
+<build>
+    <plugins>
+        <plugin>
+            <groupId>com.github.crmepham</groupId>
+            <artifactId>resource-bundler-maven-plugin</artifactId>
+            <version>1.1-SNAPSHOT</version>
+            <configuration>
+                <fromPath>path/to/resources</fromPath>
+                <toPath>path/to/target/destination</toPath>
+            </configuration>
+            <executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>bundle</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</build>
 ```
