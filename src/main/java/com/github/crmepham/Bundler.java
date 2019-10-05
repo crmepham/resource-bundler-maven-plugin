@@ -128,7 +128,7 @@ public class Bundler extends AbstractMojo {
 
         if (bundles.isEmpty()) {
             getLog().info("No directories found in: " + directory.getAbsolutePath());
-            return false;
+            return true;
         }
 
         final File destination = new File(projectBuildDirectory + File.separator + toPath);
@@ -215,7 +215,7 @@ public class Bundler extends AbstractMojo {
 
         final String name = bundleName + "-bundle" + "." + extension.name();
         getLog().info(format("Found the following %s file(s) that will be minified and bundled into file '%s':", files.size(), name));
-        final StringBuffer buffer = new StringBuffer();
+        final StringBuilder buffer = new StringBuilder();
         for (int i = 0, j = files.size(); i < j; i++) {
             final File file = files.get(i);
             try {
@@ -225,7 +225,6 @@ public class Bundler extends AbstractMojo {
 
             } catch (IOException e) {
                 getLog().error(format("Failed to read file: %s", file.getAbsolutePath()));
-                continue;
             }
         }
 
@@ -239,7 +238,7 @@ public class Bundler extends AbstractMojo {
             FileUtils.writeStringToFile(bundle, buffer.toString(), UTF_8);
             return bundle;
         } catch (IOException e) {
-            getLog().error(format("Failed to write contents to file: " + absolutePath));
+            getLog().error("Failed to write contents to file: " + absolutePath);
             return null;
         }
     }
