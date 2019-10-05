@@ -42,7 +42,7 @@ public class BundlerTest {
         doReturn(emptyList).when(bundler).collectFiles(file2, FileExtension.css, new ArrayList<>());
         doReturn(null).when(bundler).createBundle("name", FileExtension.css, emptyList);
 
-        assertThat(bundler.bundle(directory)).isFalse();
+        assertThat(bundler.bundle(directory)).isTrue();
     }
 
     @Test
@@ -65,7 +65,7 @@ public class BundlerTest {
         doReturn("name1").when(file1).getName();
         doReturn("name2").when(file1).getName();
 
-        assertThat(bundler.bundle(directory)).isFalse();
+        assertThat(bundler.bundle(directory)).isTrue();
     }
 
     @Test
@@ -88,7 +88,7 @@ public class BundlerTest {
         doReturn("name1").when(file1).getName();
         doReturn("name2").when(file1).getName();
 
-        assertThat(bundler.bundle(directory)).isFalse();
+        assertThat(bundler.bundle(directory)).isTrue();
     }
 
     @Test
