@@ -8,7 +8,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.AbstractMojo;
@@ -35,8 +37,10 @@ import org.apache.maven.plugins.annotations.Parameter;
  *
  * <p>
  *     Once the bundled files are created they are then copied to the target directory.
- *     By default this directory is <em>target/class/static</em>. This can be overridden
- *     by specifying a value for the <em>toPath</em> property.
+ *     By default this directory is <em>target/classes/static</em>. This can be overridden
+ *     by specifying a value for the <em>toPath</em> property. By default on the bundle
+ *     files are copied across to the target directory, however, you can override this
+ *     behaviour by setting the <em>copyBundleFilesOnly</em> property to <em>false</em>.
  * </p>
  *
  * See https://github.com/crmepham/resource-bundler-maven-plugin
@@ -66,6 +70,13 @@ public class Bundler extends AbstractMojo {
     private String fromPath;
 
     /**
+     * If true, only the bundle files are copied across to the build (target) directory. Not the
+     * <em>Javascript</em> and <em>CSS</em> files that were bundled.
+     */
+    @Parameter(defaultValue = "true", readonly = true)
+    private boolean copyBundleFilesOnly;
+
+    /**
      * The directory to copy the bundled files to within the <em>target</em> directory.
      * By default this is the <em>classes/static</em> directory.
      */
@@ -73,13 +84,16 @@ public class Bundler extends AbstractMojo {
     private String toPath;
 
     public void execute() throws MojoExecutionException {
+        getLog().info("Copy bundle files only: " + copyBundleFilesOnly);
         final String fullPath = projectResourcesDirectory + File.separator + fromPath;
         final File directory = new File(fullPath);
         if (!directory.exists()) {
             throw new MojoExecutionException("Directory does not exist: " + fullPath);
         }
-        if (bundle(directory)) {
+        if (!bundle(directory)) {
             getLog().error("Bundling failed. See above for details.");
+        } else {
+            getLog().info("Bundling completed successfully!");
         }
     }
 
@@ -90,18 +104,24 @@ public class Bundler extends AbstractMojo {
      * @return True if the execution was successful.
      */
     boolean bundle(final File directory) {
-        final List<File> bundles = new ArrayList<>();
+        final Map<File, List<File>> bundles = new HashMap<>();
         for (File f : directory.listFiles()) {
             if (f.isDirectory()) {
                 final String bundleName = f.getName();
-                File bundle = createBundle(bundleName, js, collectFiles(f, js, new ArrayList<>()));
-                if (bundle != null) {
-                    bundles.add(bundle);
+                List<File> files = collectFiles(f, js, new ArrayList<>());
+                if (!files.isEmpty()) {
+                    final File bundle = createBundle(bundleName, js, files);
+                    if (bundle != null) {
+                        bundles.put(bundle, files);
+                    }
                 }
 
-                bundle = createBundle(bundleName, css, collectFiles(f, css, new ArrayList<>()));
-                if (bundle != null) {
-                    bundles.add(bundle);
+                files = collectFiles(f, css, new ArrayList<>());
+                if (!files.isEmpty()) {
+                    final File bundle = createBundle(bundleName, css, files);
+                    if (bundle != null) {
+                        bundles.put(bundle, files);
+                    }
                 }
             }
         }
@@ -119,21 +139,64 @@ public class Bundler extends AbstractMojo {
 
         getLog().info(format("Copying the following %s bundle file(s) to '%s':", bundles.size(), destination.getAbsolutePath()));
 
-        for (int i = 0, j = bundles.size(); i < j; i++) {
-            final File bundle = bundles.get(i);
+        for (Map.Entry<File, List<File>> entry : bundles.entrySet()) {
+            final File bundle = entry.getKey();
             final File target = new File(destination + File.separator + bundle.getName());
             if (target.exists()) {
                 target.delete();
             }
+
             try {
                 FileUtils.copyFileToDirectory(bundle, destination, true);
-                getLog().info(i+1 + ". " + bundle.getName());
+                if (copyBundleFilesOnly) {
+                    final List<File> files = entry.getValue();
+                    for (File file : files) {
+                        final String absolutePath = file.getAbsolutePath();
+                        final String destinationBasePath = projectBuildDirectory + File.separator + toPath;
+                        final String destinationFileAbsolutePath = absolutePath.replace(projectResourcesDirectory + File.separator + fromPath, destinationBasePath);
+                        getLog().info("Deleting file: " + destinationFileAbsolutePath);
+                        final File fileToDelete = new File(destinationFileAbsolutePath);
+                        boolean deleted = fileToDelete.delete();
+                        if (!deleted) {
+                            getLog().error("Failed to delete file: " + destinationFileAbsolutePath);
+                        }
+                        recursivelyDeleteEmptyDirectories(fileToDelete.getParent(), destinationBasePath);
+                    }
+                }
             } catch (IOException e) {
-                getLog().error(format("Failed to move file '%s' to target directory 'ss': %s",
-                                     bundle.getAbsolutePath(), e.getMessage()));
+                getLog().error(format("Failed to move file '%s' to target directory 'ss': %s", bundle.getAbsolutePath(), e.getMessage()));
             }
         }
         return true;
+    }
+
+    /**
+     * If only copy across the bundle files then this method will attempt to delete empty parent directories of the
+     * file that was deleted.
+     * @param destinationPath The path to the directory the file resides in, and any parent directory there after.
+     * @param destinationBasePath The base target directory. This directory and its parents should not be deleted.
+     */
+    private void recursivelyDeleteEmptyDirectories(final String destinationPath, final String destinationBasePath) {
+        if (destinationPath == null || destinationPath.length() == 0) {
+            return;
+        }
+
+        if (destinationPath.equals(destinationBasePath)) {
+            return;
+        }
+
+        final File file = new File(destinationPath);
+        if (!file.exists()) {
+            return;
+        }
+
+        if (file.isDirectory()) {
+            if (file.listFiles().length > 0) {
+                return;
+            }
+            file.delete();
+        }
+        recursivelyDeleteEmptyDirectories(file.getParent(), destinationBasePath);
     }
 
     /**
