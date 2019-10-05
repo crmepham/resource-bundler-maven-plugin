@@ -93,3 +93,5 @@ Additionally, the bundle files will be generated in the `target` build directory
     </plugins>
 </build>
 ```
+
+3. By default only the bundle files will get copied across to the target directory. You can override this by specifying the following configuration property `<copyBundleFilesOnly>true</copyBundleFilesOnly>`.
