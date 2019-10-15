@@ -114,3 +114,31 @@ Additionally, the bundle files will be generated in the `target` build directory
   }
 ]
 ```
+
+## Get started
+Include the plugin dependency in your `pom.xml`:
+```
+<plugin>
+    <groupId>com.github.crmepham</groupId>
+    <artifactId>resource-bundler-maven-plugin</artifactId>
+    <version>1.0.6</version>
+    <executions>
+        <execution>
+            <phase>package</phase>
+            <goals>
+                <goal>bundle</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+## Properties
+|Property|Default Value|Description|
+|--------|-------------|-----------|
+|fromPath|`static`|The top-level directory to scan for Javascript and CSS files to bundle. By default this is the `static` directory underneath `src/main/resources`.|
+|toPath|`classes/static`|The directory to copy the bundled files to within the `target` directory. By default this is the `classes/static` directory.|
+|copyBundleFilesOnly|`true`|If true, only the bundle files are copied across to the build (target) directory. Not the individual Javascript and CSS files that were bundled.|
+|externalDependenciesFilePath|`src/main/resources/bundler/dependencies.json`|The path to the JSON file containing the list of external URI's that need to be fetched. These URI's will point to Javascript or CSS content. By default the file path is `src/main/resources/bundler/dependencies.json`.|
+|projectResourcesDirectory|`src/main/resources`|The resource directory. Typically this is the `src/main/resources` directory, but it may differ if you are not using a Spring-based application.|
+|projectBuildDirectory|`target`|The project build directory. Typically this is the `target` directory but it may differ if you are not using a Spring-based application.|
