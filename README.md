@@ -1,9 +1,5 @@
 # resource-bundler-maven-plugin
-A Maven plugin that minifies and bundles static resource Javascript and CSS files.
-
-## Why does this plugin exist?
-1. I wanted to learn about developing Maven plugins in general and thought this would make a useful project. 
-2. I needed a simple lightweight plugin that would both minify and bundle my static Javascript and CSS files.
+A simple and lightweight Maven plugin that will minify and bundle both local and external Javascript and CSS dependencies.
 
 ## How does it work?
 Assuming you have created a Spring Boot project and have some static Javascript and CSS files in the `resources/static` directory, like so:
