@@ -50,7 +50,7 @@ Additionally, the bundle files will be generated in the `target` build directory
         <plugin>
             <groupId>com.github.crmepham</groupId>
             <artifactId>resource-bundler-maven-plugin</artifactId>
-            <version>1.0.5</version>
+            <version>1.0.6</version>
             <executions>
                 <execution>
                     <phase>package</phase>
@@ -72,7 +72,7 @@ Additionally, the bundle files will be generated in the `target` build directory
         <plugin>
             <groupId>com.github.crmepham</groupId>
             <artifactId>resource-bundler-maven-plugin</artifactId>
-            <version>1.0.5</version>
+            <version>1.0.6</version>
             <configuration>
                 <fromPath>path/to/resources</fromPath>
                 <toPath>path/to/target/destination</toPath>
