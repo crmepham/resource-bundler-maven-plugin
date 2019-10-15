@@ -95,3 +95,26 @@ Additionally, the bundle files will be generated in the `target` build directory
 ```
 
 3. By default only the bundle files will get copied across to the target directory. You can override this by specifying the following configuration property `<copyBundleFilesOnly>false</copyBundleFilesOnly>`.
+
+4. You can also define external dependencies. These dependencies will be fetched, minified and bundled just like the local files. By default this must be done by creating the file `src/main/resources/dependencies.json`. This path can be overridden by specifying its value in the `<configuration>` section of the `pom.xml`, for example: `<externalDependenciesFilePath>path/to/file.json</externalDependenciesFilePath>`. The following is an example of how to configure your bundles and the external dependencies to be included in each bundle:
+
+```
+[
+  {
+    "name": "bootstrap",
+    "js": [
+      "https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js",
+      "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    ],
+    "css": [
+      "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    ]
+  },
+  {
+    "name": "jquery",
+    "js": [
+      "https://code.jquery.com/jquery-3.4.1.slim.min.js"
+    ]
+  }
+]
+```
