@@ -133,7 +133,7 @@ Include the plugin dependency in your `pom.xml`:
 </plugin>
 ```
 
-## Properties
+## Optional configuration properties
 |Property|Default Value|Description|
 |--------|-------------|-----------|
 |fromPath|`static`|The top-level directory to scan for Javascript and CSS files to bundle. By default this is the `static` directory underneath `src/main/resources`.|
