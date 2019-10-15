@@ -19,6 +19,8 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
+import com.google.gson.Gson;
+
 /**
  * <p>Minifies and bundles static <em>Javascript</em> and <em>CSS</em> resources.</p>
  *
@@ -48,7 +50,7 @@ import org.apache.maven.plugins.annotations.Parameter;
  * @author Christopher Mepham
  */
 @Mojo(name = "bundle", defaultPhase = LifecyclePhase.PACKAGE)
-public class Bundler extends AbstractMojo {
+public class Main extends AbstractMojo {
 
     /**
      * The project build directory. Typically this is the <em>target</em> directory.
@@ -61,6 +63,13 @@ public class Bundler extends AbstractMojo {
      */
     @Parameter(defaultValue = "${project.build.resources[0].directory}", required = true, readonly = true)
     private String projectResourcesDirectory;
+
+    /**
+     * The path to the JSON file containing the list of external URI's. These URI's will point to
+     * <em>Javascript</em> or <em>CSS</em> content. By default the file path is <em>src/main/resources/bundler/dependencies.json</em>.
+     */
+    @Parameter(defaultValue = "${project.build.resources[0].directory}/bundler/dependencies.json", readonly = true)
+    private String externalDependenciesFilePath;
 
     /**
      * The top-level directory to scan for <em>Javascript</em> and <em>CSS</em> files to bundle.
@@ -84,16 +93,109 @@ public class Bundler extends AbstractMojo {
     private String toPath;
 
     public void execute() throws MojoExecutionException {
-        getLog().info("Copy bundle files only: " + copyBundleFilesOnly);
         final String fullPath = projectResourcesDirectory + File.separator + fromPath;
         final File directory = new File(fullPath);
         if (!directory.exists()) {
             throw new MojoExecutionException("Directory does not exist: " + fullPath);
         }
-        if (!bundle(directory)) {
+
+        if (!bundleLocal(directory)) {
             getLog().error("Bundling failed. See above for details.");
-        } else {
-            getLog().info("Bundling completed successfully!");
+            return;
+        }
+
+        final File dependencies = new File(externalDependenciesFilePath);
+        if (!dependencies.exists()) {
+            getLog().error("Skipping bundling of external dependencies. No file found at: " + externalDependenciesFilePath);
+            return;
+        }
+
+        if (!bundleExternal(dependencies)) {
+            getLog().error("Bundling of external dependencies failed. See above for details.");
+            return;
+        }
+
+        getLog().info("Bundling completed successfully!");
+    }
+
+    /**
+     * Minifies and bundles external <em>Javascript</em> and <em>CSS</em> content. The external dependency URI's must
+     * be listed in the corresponding dependencies file, by default this file is located at <em>src/main/resources/bundler/dependencies.json</em>.
+     * This feature is useful if you want to use the latest versions of the dependencies, assuming these dependencies have
+     * a <em>latest</em> URI you can point to.
+     * @param file The file containing the JSON list of URI's.
+     * @return True if the execution was successful.
+     */
+    private boolean bundleExternal(final File file) throws MojoExecutionException {
+        getLog().info("Bundling external Javascript and CSS dependencies.");
+        final List<Map<String, Object>> dependencies;
+        try {
+            dependencies = new ArrayList<>(new Gson().fromJson(getFileAsString(file), List.class));
+        } catch (IOException e) {
+            getLog().error("Failed to read file: " + file.getAbsolutePath());
+            return false;
+        }
+
+        if (dependencies.isEmpty()) {
+            getLog().info("No external dependencies defined.");
+        }
+
+        for (Map<String, Object> bundle : dependencies) {
+            createExternalBundle(bundle, js);
+            createExternalBundle(bundle, css);
+        }
+
+        return true;
+    }
+
+    /**
+     * Will attempt to fetch external <em>Javascript</em> and <em>CSS</em> dependencies, minify
+     * them and then bundle them.
+     * @param bundle The map of bundle name to list of uri's.
+     * @param extension The desired bundle file extension.
+     * @throws MojoExecutionException
+     */
+    private void createExternalBundle(final Map<String, Object> bundle, final FileExtension extension) throws MojoExecutionException {
+        final List<String> uris = (List<String>) bundle.get(extension.name());
+        if (uris == null || uris.isEmpty()) {
+            return;
+        }
+
+        final String name = (String) bundle.get("name");
+        final String fullPath = projectResourcesDirectory + File.separator + fromPath + File.separator + name + "-bundle." + extension.name();
+        final File bundleFile = new File(fullPath);
+        final StringBuilder builder = new StringBuilder();
+        for (String uri : uris) {
+            try {
+                getLog().info("Fetching external dependency: " + uri);
+                final String result = ExternalDependencyFetcher.fetch(uri);
+                builder.append(Minifier.minify(result, FileExtension.valueOf(getFileExtension(uri))));
+            } catch (IOException e) {
+                throw new MojoExecutionException("Failed to fetch external dependency from: " + uri);
+            }
+        }
+
+        try {
+            if (bundleFile.exists()) {
+                builder.append(FileUtils.readFileToString(bundleFile, UTF_8));
+            }
+
+            FileUtils.writeStringToFile(bundleFile, builder.toString(), UTF_8);
+        } catch (IOException e) {
+            getLog().error("Failed to write contents to file: " + fullPath);
+        }
+
+        final File destination = new File(projectBuildDirectory + File.separator + toPath);
+        if (!destination.isDirectory()) {
+            throw new MojoExecutionException("Invalid destination directory: " + destination.getAbsolutePath());
+        }
+
+        getLog().info(format("Copying external bundle file '%s' to '%s':", bundleFile.getName(), destination.getAbsolutePath()));
+
+        try {
+            FileUtils.copyFileToDirectory(bundleFile, destination, true);
+        } catch (IOException e) {
+            getLog().error(format("Failed to move file '%s' to target directory 'ss': %s", bundleFile.getAbsolutePath(), e.getMessage()));
         }
     }
 
@@ -103,7 +205,8 @@ public class Bundler extends AbstractMojo {
      * @param directory The source directory where the unminified <em>Javascript</em> and <em>CSS</em> files reside.
      * @return True if the execution was successful.
      */
-    boolean bundle(final File directory) {
+    boolean bundleLocal(final File directory) throws MojoExecutionException {
+        getLog().info("Bundling local Javascript and CSS dependencies.");
         final Map<File, List<File>> bundles = new HashMap<>();
         for (File f : directory.listFiles()) {
             if (f.isDirectory()) {
@@ -127,40 +230,25 @@ public class Bundler extends AbstractMojo {
         }
 
         if (bundles.isEmpty()) {
-            getLog().info("No directories found in: " + directory.getAbsolutePath());
+            getLog().info("Either no files were found or the files were empty in directory: " + directory.getAbsolutePath());
             return true;
         }
 
         final File destination = new File(projectBuildDirectory + File.separator + toPath);
         if (!destination.isDirectory()) {
-            getLog().error("Invalid destination directory: " + destination.getAbsolutePath());
-            return false;
+            throw new MojoExecutionException("Invalid destination directory: " + destination.getAbsolutePath());
         }
 
         getLog().info(format("Copying the following %s bundle file(s) to '%s':", bundles.size(), destination.getAbsolutePath()));
 
         for (Map.Entry<File, List<File>> entry : bundles.entrySet()) {
             final File bundle = entry.getKey();
-            final File target = new File(destination + File.separator + bundle.getName());
-            if (target.exists()) {
-                target.delete();
-            }
-
             try {
                 FileUtils.copyFileToDirectory(bundle, destination, true);
                 if (copyBundleFilesOnly) {
                     final List<File> files = entry.getValue();
                     for (File file : files) {
-                        final String absolutePath = file.getAbsolutePath();
-                        final String destinationBasePath = projectBuildDirectory + File.separator + toPath;
-                        final String destinationFileAbsolutePath = absolutePath.replace(projectResourcesDirectory + File.separator + fromPath, destinationBasePath);
-                        getLog().info("Deleting file: " + destinationFileAbsolutePath);
-                        final File fileToDelete = new File(destinationFileAbsolutePath);
-                        boolean deleted = fileToDelete.delete();
-                        if (!deleted) {
-                            getLog().error("Failed to delete file: " + destinationFileAbsolutePath);
-                        }
-                        recursivelyDeleteEmptyDirectories(fileToDelete.getParent(), destinationBasePath);
+                        deleteFile(file.getAbsolutePath());
                     }
                 }
             } catch (IOException e) {
@@ -168,6 +256,22 @@ public class Bundler extends AbstractMojo {
             }
         }
         return true;
+    }
+
+    /**
+     * Delete the files at the given absolute path.
+     * @param absolutePath The absolute path to directory you wish to delete files from.
+     */
+    private void deleteFile(final String absolutePath) {
+        final String destinationBasePath = projectBuildDirectory + File.separator + toPath;
+        final String destinationFileAbsolutePath = absolutePath.replace(projectResourcesDirectory + File.separator + fromPath, destinationBasePath);
+        getLog().info("Deleting file: " + destinationFileAbsolutePath);
+        final File fileToDelete = new File(destinationFileAbsolutePath);
+        boolean deleted = fileToDelete.delete();
+        if (!deleted) {
+            getLog().error("Failed to delete file: " + destinationFileAbsolutePath);
+        }
+        recursivelyDeleteEmptyDirectories(fileToDelete.getParent(), destinationBasePath);
     }
 
     /**

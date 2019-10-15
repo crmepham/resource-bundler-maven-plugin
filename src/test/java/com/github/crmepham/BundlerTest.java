@@ -11,21 +11,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.maven.plugin.MojoExecutionException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 public class BundlerTest {
 
-    private Bundler bundler;
+    private Main bundler;
 
     @Before
     public void setUp () {
-        bundler = Mockito.spy(new Bundler());
+        bundler = Mockito.spy(new Main());
     }
 
     @Test
-    public void testBundle_nullBundles() {
+    public void testBundle_nullBundles() throws MojoExecutionException
+    {
         final File directory = mock(File.class);
         final List<File> files = new ArrayList<>();
         final File file1 = mock(File.class);
@@ -42,11 +44,12 @@ public class BundlerTest {
         doReturn(emptyList).when(bundler).collectFiles(file2, FileExtension.css, new ArrayList<>());
         doReturn(null).when(bundler).createBundle("name", FileExtension.css, emptyList);
 
-        assertThat(bundler.bundle(directory)).isTrue();
+        assertThat(bundler.bundleLocal(directory)).isTrue();
     }
 
     @Test
-    public void testBundle_NoDirectoriesFound() {
+    public void testBundle_NoDirectoriesFound() throws MojoExecutionException
+    {
         final File directory = mock(File.class);
         final List<File> files = new ArrayList<>();
         final File file1 = mock(File.class);
@@ -65,11 +68,12 @@ public class BundlerTest {
         doReturn("name1").when(file1).getName();
         doReturn("name2").when(file1).getName();
 
-        assertThat(bundler.bundle(directory)).isTrue();
+        assertThat(bundler.bundleLocal(directory)).isTrue();
     }
 
     @Test
-    public void testBundle_NoDirectoriesFound2() {
+    public void testBundle_NoDirectoriesFound2() throws MojoExecutionException
+    {
         final File directory = mock(File.class);
         final List<File> files = new ArrayList<>();
         final File file1 = mock(File.class);
@@ -88,7 +92,7 @@ public class BundlerTest {
         doReturn("name1").when(file1).getName();
         doReturn("name2").when(file1).getName();
 
-        assertThat(bundler.bundle(directory)).isTrue();
+        assertThat(bundler.bundleLocal(directory)).isTrue();
     }
 
     @Test
