@@ -171,9 +171,16 @@ public class Main extends AbstractMojo {
             try {
                 getLog().info("Fetching external dependency: " + uri);
                 final String content = ExternalDependencyFetcher.fetch(uri);
+
+                // Don't attempt to minify previously minified files.
+                if (uri.endsWith("min.js") || uri.endsWith("min.css")) {
+                    builder.append(content);
+                    continue;
+                }
+
                 final Minifier minifier = extension == FileExtension.js ? new JavascriptMinifier(getLog(), getContext()) : new CssMinifier();
                 builder.append(minifier.minify(content));
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new MojoExecutionException("Failed to fetch external dependency from: " + uri);
             }
         }
