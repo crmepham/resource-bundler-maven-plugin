@@ -50,7 +50,7 @@ Additionally, the bundle files will be generated in the `target` build directory
         <plugin>
             <groupId>com.github.crmepham</groupId>
             <artifactId>resource-bundler-maven-plugin</artifactId>
-            <version>1.0.7</version>
+            <version>1.0.8</version>
             <executions>
                 <execution>
                     <phase>package</phase>
@@ -72,7 +72,7 @@ Additionally, the bundle files will be generated in the `target` build directory
         <plugin>
             <groupId>com.github.crmepham</groupId>
             <artifactId>resource-bundler-maven-plugin</artifactId>
-            <version>1.0.7</version>
+            <version>1.0.8</version>
             <configuration>
                 <fromPath>path/to/resources</fromPath>
                 <toPath>path/to/target/destination</toPath>
@@ -121,7 +121,7 @@ Include the plugin dependency in your `pom.xml`:
 <plugin>
     <groupId>com.github.crmepham</groupId>
     <artifactId>resource-bundler-maven-plugin</artifactId>
-    <version>1.0.7</version>
+    <version>1.0.8</version>
     <executions>
         <execution>
             <phase>package</phase>
