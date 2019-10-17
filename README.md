@@ -1,3 +1,6 @@
+[![Version](https://img.shields.io/badge/version-1.0.8-green.svg)](https://mvnrepository.com/artifact/com.github.crmepham/resource-bundler-maven-plugin/1.0.8)
+
+
 # resource-bundler-maven-plugin
 A simple and lightweight Maven plugin that will minify and bundle both local and external Javascript and CSS dependencies.
 
