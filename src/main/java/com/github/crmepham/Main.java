@@ -19,7 +19,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.sonatype.plexus.build.incremental.ThreadBuildContext;
 
 import com.google.gson.Gson;
 
@@ -108,13 +107,12 @@ public class Main extends AbstractMojo {
 
         final File dependencies = new File(externalDependenciesFilePath);
         if (!dependencies.exists()) {
-            getLog().error("Skipping bundling of external dependencies. No file found at: " + externalDependenciesFilePath);
-            return;
-        }
-
-        if (!bundleExternal(dependencies)) {
-            getLog().error("Bundling of external dependencies failed. See above for details.");
-            return;
+            getLog().info("Skipping bundling of external dependencies. No configuration file found at: " + externalDependenciesFilePath);
+        } else {
+            if (!bundleExternal(dependencies)) {
+                getLog().error("Bundling of external dependencies failed.");
+                return;
+            }
         }
 
         getLog().info("Bundling completed successfully!");
