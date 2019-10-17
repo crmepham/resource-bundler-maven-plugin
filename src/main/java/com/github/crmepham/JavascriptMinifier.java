@@ -27,7 +27,15 @@ import net_alchim31_maven_yuicompressor.ErrorReporter4Mojo;
  *
  * @see https://github.com/yui/yuicompressor
  */
-class JavascriptMinifier {
+class JavascriptMinifier extends Minifier {
+
+    private Log log;
+    private BuildContext context;
+
+    JavascriptMinifier(Log log, BuildContext context) {
+        this.log = log;
+        this.context = context;
+    }
 
     /**
      * Minifies the given Javascript file contents using the YUICompressor library.
@@ -35,7 +43,7 @@ class JavascriptMinifier {
      * @param input The file contents as a String.
      * @return The minified file contents.
      */
-    String minify(String input, Log log, BuildContext context) throws IOException {
+    String minify(String input) throws IOException {
         final ErrorReporter4Mojo errorReporter = new ErrorReporter4Mojo(log, false, context);
         final JavaScriptCompressor compressor = new JavaScriptCompressor(new StringReader(input), errorReporter);
         final StringWriter writer = new StringWriter();

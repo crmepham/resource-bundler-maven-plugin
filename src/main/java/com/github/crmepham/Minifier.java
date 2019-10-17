@@ -1,5 +1,7 @@
 package com.github.crmepham;
 
+import java.io.IOException;
+
 /**
  * Contains static method that will perform minification of supplied file contents.
  *
@@ -17,7 +19,7 @@ abstract class Minifier {
      * @param input The file contents as a String.
      * @return The minified file contents.
      */
-    String minify(String input) {
+    String minify(String input) throws IOException {
 
         // Remove line terminator characters.
         for (int i = 0, j = WHITESPACE_CHARACTERS.length; i < j; i++) {

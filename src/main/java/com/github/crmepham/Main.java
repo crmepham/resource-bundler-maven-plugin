@@ -4,6 +4,7 @@ import static com.github.crmepham.FileExtension.css;
 import static com.github.crmepham.FileExtension.js;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.sonatype.plexus.build.incremental.ThreadBuildContext.getContext;
 
 import java.io.File;
 import java.io.IOException;
@@ -169,8 +170,9 @@ public class Main extends AbstractMojo {
         for (String uri : uris) {
             try {
                 getLog().info("Fetching external dependency: " + uri);
-                final String result = ExternalDependencyFetcher.fetch(uri);
-                builder.append(new JavascriptMinifier().minify(result, getLog(), ThreadBuildContext.getContext()));
+                final String content = ExternalDependencyFetcher.fetch(uri);
+                final Minifier minifier = extension == FileExtension.js ? new JavascriptMinifier(getLog(), getContext()) : new CssMinifier();
+                builder.append(minifier.minify(content));
             } catch (IOException e) {
                 throw new MojoExecutionException("Failed to fetch external dependency from: " + uri);
             }
@@ -324,8 +326,9 @@ public class Main extends AbstractMojo {
         for (int i = 0, j = files.size(); i < j; i++) {
             final File file = files.get(i);
             try {
-                final String content = new CssMinifier().minify(getFileAsString(file));
-                buffer.append(content);
+                final String content = getFileAsString(file);
+                final Minifier minifier = extension == FileExtension.js ? new JavascriptMinifier(getLog(), getContext()) : new CssMinifier();
+                buffer.append(minifier.minify(content));
                 getLog().info(i+1 + ". " + file.getAbsolutePath());
 
             } catch (IOException e) {

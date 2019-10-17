@@ -1,5 +1,7 @@
 package com.github.crmepham;
 
+import java.io.IOException;
+
 /**
  * Contains static method that will perform minification of supplied file contents.
  *
@@ -22,7 +24,7 @@ class CssMinifier extends Minifier {
      * @param input The file contents as a String.
      * @return The minified file contents.
      */
-    String minify(String input) {
+    String minify(String input) throws IOException {
         input = super.minify(input);
 
         // Remove all whitespace
