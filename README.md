@@ -142,3 +142,5 @@ Include the plugin dependency in your `pom.xml`:
 |externalDependenciesFilePath|`src/main/resources/bundler/dependencies.json`|The path to the JSON file containing the list of external URI's that need to be fetched. These URI's will point to Javascript or CSS content. By default the file path is `src/main/resources/bundler/dependencies.json`.|
 |projectResourcesDirectory|`src/main/resources`|The resource directory. Typically this is the `src/main/resources` directory, but it may differ if you are not using a Spring-based application.|
 |projectBuildDirectory|`target`|The project build directory. Typically this is the `target` directory but it may differ if you are not using a Spring-based application.|
+
+This product includes software developed by Copyright (c) 2013 Yahoo! Inc.
