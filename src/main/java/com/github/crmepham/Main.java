@@ -18,6 +18,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.sonatype.plexus.build.incremental.ThreadBuildContext;
 
 import com.google.gson.Gson;
 
@@ -169,7 +170,7 @@ public class Main extends AbstractMojo {
             try {
                 getLog().info("Fetching external dependency: " + uri);
                 final String result = ExternalDependencyFetcher.fetch(uri);
-                builder.append(Minifier.minify(result, FileExtension.valueOf(getFileExtension(uri))));
+                builder.append(new JavascriptMinifier().minify(result, getLog(), ThreadBuildContext.getContext()));
             } catch (IOException e) {
                 throw new MojoExecutionException("Failed to fetch external dependency from: " + uri);
             }
@@ -323,7 +324,7 @@ public class Main extends AbstractMojo {
         for (int i = 0, j = files.size(); i < j; i++) {
             final File file = files.get(i);
             try {
-                final String content = Minifier.minify(getFileAsString(file), extension);
+                final String content = new CssMinifier().minify(getFileAsString(file));
                 buffer.append(content);
                 getLog().info(i+1 + ". " + file.getAbsolutePath());
 

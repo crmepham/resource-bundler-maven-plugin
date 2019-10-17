@@ -75,6 +75,11 @@
             <version>3.1.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>net.alchim31.maven</groupId>
+            <artifactId>yuicompressor-maven-plugin</artifactId>
+            <version>1.5.1</version>
+        </dependency>
     </dependencies>
 
     <scm>
