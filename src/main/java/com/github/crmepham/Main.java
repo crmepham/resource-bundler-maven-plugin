@@ -9,6 +9,7 @@ import static org.sonatype.plexus.build.incremental.ThreadBuildContext.getContex
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -92,6 +93,12 @@ public class Main extends AbstractMojo {
      */
     @Parameter(defaultValue = "classes/static", readonly = true)
     private String toPath;
+
+    /**
+     * A comma-separated list of of top-level directories to exclude from bundling.
+     */
+    @Parameter(readonly = true)
+    private String excludedDirectories;
 
     public void execute() throws MojoExecutionException {
         final String fullPath = projectResourcesDirectory + File.separator + fromPath;
@@ -216,7 +223,8 @@ public class Main extends AbstractMojo {
     boolean bundleLocal(final File directory) throws MojoExecutionException {
         getLog().info("Bundling local Javascript and CSS dependencies.");
         final Map<File, List<File>> bundles = new HashMap<>();
-        for (File f : directory.listFiles()) {
+        final List<File> directories = filterExcludedDirectories(directory.listFiles());
+        for (File f : directories) {
             if (f.isDirectory()) {
                 final String bundleName = f.getName();
                 List<File> files = collectFiles(f, js, new ArrayList<>());
@@ -264,6 +272,32 @@ public class Main extends AbstractMojo {
             }
         }
         return true;
+    }
+
+    /**
+     * Filter out any excluded directories and files.
+     * @param listFiles The top-level files which may contain files and excluded directories.
+     * @return The filtered list of files.
+     */
+    private List<File> filterExcludedDirectories(final File[] listFiles) {
+        if (excludedDirectories == null || excludedDirectories.length() == 0) {
+            return Arrays.asList(listFiles);
+        }
+
+        final String suffix = excludedDirectories.length() > 1 ? "ies" : "y";
+        getLog().info(format("Ignoring top-level director%s '%s'.", suffix, excludedDirectories));
+
+        final String[] split = excludedDirectories.split(",");
+        final List<String> names = Arrays.asList(split);
+        final List<File> files = new ArrayList<>();
+        for (int i = 0, j = listFiles.length; i < j; i++) {
+            final File file = listFiles[i];
+            final String name = file.getName();
+            if (!names.contains(name)) {
+                files.add(file);
+            }
+        }
+        return files;
     }
 
     /**
