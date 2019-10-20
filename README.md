@@ -1,4 +1,4 @@
-[![Version](https://img.shields.io/badge/version-1.0.8-green.svg)](https://mvnrepository.com/artifact/com.github.crmepham/resource-bundler-maven-plugin/1.0.8) [![MIT license](https://img.shields.io/badge/License-BSD-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![Version](https://img.shields.io/badge/version-1.0.9-green.svg)](https://mvnrepository.com/artifact/com.github.crmepham/resource-bundler-maven-plugin/1.0.9) [![MIT license](https://img.shields.io/badge/License-BSD-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 
 # resource-bundler-maven-plugin
@@ -53,7 +53,7 @@ Additionally, the bundle files will be generated in the `target` build directory
         <plugin>
             <groupId>com.github.crmepham</groupId>
             <artifactId>resource-bundler-maven-plugin</artifactId>
-            <version>1.0.8</version>
+            <version>1.0.9</version>
             <executions>
                 <execution>
                     <phase>package</phase>
@@ -75,7 +75,7 @@ Additionally, the bundle files will be generated in the `target` build directory
         <plugin>
             <groupId>com.github.crmepham</groupId>
             <artifactId>resource-bundler-maven-plugin</artifactId>
-            <version>1.0.8</version>
+            <version>1.0.9</version>
             <configuration>
                 <fromPath>path/to/resources</fromPath>
                 <toPath>path/to/target/destination</toPath>
@@ -124,7 +124,7 @@ Include the plugin dependency in your `pom.xml`:
 <plugin>
     <groupId>com.github.crmepham</groupId>
     <artifactId>resource-bundler-maven-plugin</artifactId>
-    <version>1.0.8</version>
+    <version>1.0.9</version>
     <executions>
         <execution>
             <phase>package</phase>
@@ -145,5 +145,6 @@ Include the plugin dependency in your `pom.xml`:
 |externalDependenciesFilePath|`src/main/resources/bundler/dependencies.json`|The path to the JSON file containing the list of external URI's that need to be fetched. These URI's will point to Javascript or CSS content. By default the file path is `src/main/resources/bundler/dependencies.json`.|
 |projectResourcesDirectory|`src/main/resources`|The resource directory. Typically this is the `src/main/resources` directory, but it may differ if you are not using a Spring-based application.|
 |projectBuildDirectory|`target`|The project build directory. Typically this is the `target` directory but it may differ if you are not using a Spring-based application.|
+|excludedDirectories||A comma-separated list of of top-level directories to exclude from minification and bundling.|
 
 This product includes software developed by Copyright (c) 2013 Yahoo! Inc.
